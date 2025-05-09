@@ -171,7 +171,10 @@ export default function Cart() {
                     <span>סה"כ:</span>
                     <span>₪{subtotal.toFixed(2)}</span>
                   </div>
-                  <Button className="w-full bg-amber-600 hover:bg-amber-700">
+                  <Button
+                    className="w-full bg-amber-600 hover:bg-amber-700"
+                    onClick={() => (window.location.href = "/checkout")}
+                  >
                     המשך לתשלום
                   </Button>
                 </div>

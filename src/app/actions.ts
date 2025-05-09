@@ -165,3 +165,78 @@ export const signOutAction = async () => {
   await supabase.auth.signOut();
   return redirect("/sign-in");
 };
+
+export const createCheckout = async (formData: FormData) => {
+  // Get form data
+  const firstName = formData.get("firstName") as string;
+  const lastName = formData.get("lastName") as string;
+  const email = formData.get("email") as string;
+  const phone = formData.get("phone") as string;
+  const address = formData.get("address") as string;
+  const city = formData.get("city") as string;
+  const postalCode = formData.get("postalCode") as string;
+  const cartItems = formData.get("cartItems") as string;
+  const totalAmount = formData.get("totalAmount") as string;
+
+  // Validate required fields
+  if (
+    !firstName ||
+    !lastName ||
+    !email ||
+    !phone ||
+    !address ||
+    !city ||
+    !postalCode ||
+    !cartItems ||
+    !totalAmount
+  ) {
+    return encodedRedirect("error", "/checkout", "כל השדות הם חובה");
+  }
+
+  try {
+    // Parse cart items
+    const items = JSON.parse(cartItems);
+    if (!items || items.length === 0) {
+      return encodedRedirect("error", "/checkout", "הסל שלך ריק");
+    }
+
+    // Create order in database
+    const supabase = await createClient({ admin: true });
+
+    // Generate a unique order ID
+    const orderId = `ORDER-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+    // Create order record
+    const { error: orderError } = await supabase.from("orders").insert({
+      order_id: orderId,
+      customer_name: `${firstName} ${lastName}`,
+      email: email,
+      phone: phone,
+      address: address,
+      city: city,
+      postal_code: postalCode,
+      total_amount: parseFloat(totalAmount),
+      status: "pending",
+      items: items,
+    });
+
+    if (orderError) {
+      console.error("Error creating order:", orderError);
+      return encodedRedirect("error", "/checkout", "אירעה שגיאה ביצירת ההזמנה");
+    }
+
+    // Redirect to Tranzilla payment page
+    // In a real implementation, you would generate a proper Tranzilla payment URL
+    // with the correct parameters for your merchant account
+
+    // For demonstration purposes, we'll redirect to a payment success page
+    return redirect(`/payment/success?order=${orderId}`);
+
+    // In a real implementation with Tranzilla:
+    // const tranzillaUrl = `https://direct.tranzila.com/yourmerchant/iframenew.php?sum=${totalAmount}&currency=1&cred_type=1&order_id=${orderId}`;
+    // return redirect(tranzillaUrl);
+  } catch (error) {
+    console.error("Checkout error:", error);
+    return encodedRedirect("error", "/checkout", "אירעה שגיאה בתהליך התשלום");
+  }
+};
