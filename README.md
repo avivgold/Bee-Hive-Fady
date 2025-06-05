@@ -30,7 +30,6 @@ This project is a Next.js e-commerce application powered by Supabase for authent
 
 4. **Deploying to a domain**
 
-   Deploy the app to a host such as [Vercel](https://vercel.com/) or [Netlify](https://www.netlify.com/). Configure the same environment variables on your hosting provider and point your domain's DNS records to the generated deployment URL. Most providers offer guides for attaching custom domains.
 
 ## Migrations
 
